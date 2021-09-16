@@ -86,3 +86,29 @@ module.exports.logout=(req,res)=>{
 
   return res.redirect('/login');
 };
+
+
+module.exports.home= async (req,res)=>{
+
+  const token=req.cookies.jwt;
+  if(token){
+  jwt.verify(token,'hashmy key hash my key',async (err,decodedKey)=>{
+      if(err)
+      {
+          console.log(err);
+          res.redirect('back');
+      }
+      else
+      {
+          console.log(decodedKey);
+
+          const user=await User.findById(decodedKey.id);
+
+          res.render('home',{
+            name:user.name
+          });
+      }
+  });
+
+}
+};
