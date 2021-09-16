@@ -51,6 +51,18 @@ module.exports.sign_up_add=async (req,res)=>{
     }
 };
 
-module.exports.login_verify=(req,res)=>{
-    return res.render('signup');
+module.exports.login_verify=async (req,res) => {
+
+    const {email,password}=req.body;
+
+    try{
+        const user=await User.login(email,password);
+        console.log(user);
+
+        return res.status(200).json({user:user._id});
+    }catch(err)
+    {
+      console.log(err);
+      return res.status(400).json({error:"Incoorect credentials"});
+    }
 };

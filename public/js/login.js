@@ -39,7 +39,7 @@ window.addEventListener('load',function(){
     
         }
     
-          console.log(name," ",email," ",password);
+        
       });
     
     
