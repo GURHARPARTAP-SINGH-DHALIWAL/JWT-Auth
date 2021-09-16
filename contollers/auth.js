@@ -4,7 +4,17 @@ const jwt=require('jsonwebtoken');
 const handleErrors = (err) => {
     console.log(err.message, err.code);
     let errors = { email: '', password: '' };
-  
+     
+     if(err.message==="incorrect email")
+     {
+       errors.email="email not registered";
+     }
+
+     if(err.message==="incorrect password")
+     {
+       errors.password="incorrect password";
+     }
+
     // duplicate email error
     if (err.code === 11000) {
       errors.email = 'that email is already registered';
@@ -58,11 +68,14 @@ module.exports.login_verify=async (req,res) => {
     try{
         const user=await User.login(email,password);
         console.log(user);
+        res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
+        
 
         return res.status(200).json({user:user._id});
     }catch(err)
     {
       console.log(err);
-      return res.status(400).json({error:"Incoorect credentials"});
+      let errors=handleErrors(err);
+      return res.status(400).json({errors});
     }
 };
