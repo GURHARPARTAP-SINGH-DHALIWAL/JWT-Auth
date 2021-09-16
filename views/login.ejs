@@ -1,8 +1,8 @@
-<form action="" class="form">
+<form action="" class="form card center" id="login-form">
 
     <div class="row center"><h1>Login</h1></div>
-
-       <!-- <div class="row">
+<!-- 
+       <div class="row">
         <label for="name">Name : </label>
         <input type="text" name="name" id="name" required>
         <div class="error name"></div>
@@ -11,34 +11,21 @@
 
     <div class="row">
     <label for="email">Email : </label>
-    <input type="email" name="email" id="email" required>
-    <div class="error email"></div>
+    <input type="text" name="email" id="email" required>
+    <div class="error email red-text" id="errE"></div>
     </div>
 
    <div class="row">
     <label for="password">Password : </label>
     <input type="password" name="password" id="password" required>
-    <div class="error password"></div>
+    <div class="error password red-text" id="errP"></div>
     </div>
 
     <div class="row">
-    <button class="btn center right" type="submit">Login</button>
+    <button class="btn center black" type="submit">Login</button>
     </div>
 
 
 </form>
 
 
-<script>
-
-    const form=document.querySelector('.form');
-
-    form.addEventListener('submit',(e)=>{
-        e.preventDefault();
-        const name=form.name.value;
-        const email=form.email.value;
-        const password=form.password.value;
-
-        console.log(name," ",email," ",password);
-    });
-</script>
