@@ -68,6 +68,7 @@ module.exports.login_verify=async (req,res) => {
     try{
         const user=await User.login(email,password);
         console.log(user);
+        const token=await createToken(user._id);
         res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
         
 
