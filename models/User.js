@@ -1,6 +1,8 @@
 const mongoose=require('mongoose');
 const {isEmail}=require('validator');
 const bcrypt=require('bcrypt');
+const textLocal=require('../util/textlocal');
+const otpGenerator=require('otp-generator');
 
 const userSchema=new mongoose.Schema({
     name:{
@@ -17,6 +19,15 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:[true,'please enter password'],
         minlength:[5,'password should be atleast 5 characters long']
+    },
+
+    phone:{
+        type:String,
+        required:true,
+        unique:true
+    },
+    phoneOtp:{
+        type:String
     }
 });
 
@@ -28,14 +39,17 @@ const userSchema=new mongoose.Schema({
 // evry mongoose hook orn moddlewate shud have next otherwise it will be atuck here forever
 
 
-userSchema.pre('save',async function(next){
+// userSchema.pre('save',async function(next){
+     
+//     // Verify Phone Number
 
-    const salt=await bcrypt.genSalt();
+//     // const salt=await bcrypt.genSalt();
 
-    this.password=await bcrypt.hash(this.password,salt);
-    next();
+//     // this.password=await bcrypt.hash(this.password,salt);
 
-});
+//     next();
+
+// });
 
 // Static functions are attcahed to moedl and available anywhere
 // This points to user model
@@ -43,10 +57,13 @@ userSchema.pre('save',async function(next){
 userSchema.statics.login=async function(email,password){
 
     const user=await this.findOne({email});
+    console.log(user);
+    console.log(password);
 
     if(user)
     {
         const auth=await bcrypt.compare(password,user.password);
+        console.log(auth);
         if(auth)
         {
             return user;

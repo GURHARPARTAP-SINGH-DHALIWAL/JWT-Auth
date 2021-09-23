@@ -11,3 +11,9 @@
     left: 31%;
     padding: 10px;
 }
+#otp-form{
+    position: relative;
+    left: 31%;
+    width: 40%;
+    pad: 10px;
+}

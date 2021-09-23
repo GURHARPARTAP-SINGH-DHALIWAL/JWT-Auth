@@ -1,5 +1,8 @@
 const User=require('../models/User');
 const jwt=require('jsonwebtoken');
+const otpGenerator=require('otp-generator');
+const textlocal=require('../util/textlocal');
+const bcrypt=require('bcrypt');
 
 const handleErrors = (err) => {
     console.log(err.message, err.code);
@@ -17,7 +20,7 @@ const handleErrors = (err) => {
 
     // duplicate email error
     if (err.code === 11000) {
-      errors.email = 'that email is already registered';
+      errors.email = 'email or phone is already registered';
       return errors;
     }
   
@@ -47,10 +50,15 @@ module.exports.login_up_page=(req,res)=>{
 };
 
 module.exports.sign_up_add=async (req,res)=>{
-    const {name, email, password } = req.body;
+    let {name, email, password ,phone} = req.body;
+   
 
     try {
-      const user = await User.create({ name,email, password });
+      const salt=await bcrypt.genSalt();
+
+      password=await bcrypt.hash(password,salt);
+      
+      const user = await User.create({ name,email, password,phone});
       const token=createToken(user._id);
       res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
       res.status(201).json({user:user._id});
@@ -64,15 +72,27 @@ module.exports.sign_up_add=async (req,res)=>{
 module.exports.login_verify=async (req,res) => {
 
     const {email,password}=req.body;
+   
 
     try{
         const user=await User.login(email,password);
         console.log(user);
-        const token=await createToken(user._id);
-        res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
-        
+        const otp=await otpGenerator.generate(6, { upperCase: false, specialChars: false,alphabets:false });
+        await textlocal.sendVerificationMessage(user.phone,otp);
+        // return res.render('otpScreen');
 
-        return res.status(200).json({user:user._id});
+        // const token=await createToken(user._id);
+
+        // res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
+        
+        user.phoneOtp=otp;
+        await user.save();
+        await res.cookie('userid',user._id,{maxAge: 1000*5*60, httpOnly: true });
+        return res.status(200).json({
+          user:user._id,
+          otp:otp
+        
+        });
     }catch(err)
     {
       console.log(err);
@@ -111,4 +131,43 @@ module.exports.home= async (req,res)=>{
   });
 
 }
+};
+
+
+module.exports.verifyOtp=async (req,res)=>{
+
+    try{
+      const id=req.cookies.userid;
+      const user=await User.findById(id);
+      res.clearCookie('userid');
+      if(user)
+      {
+          res.cookie("userid","");
+          const otp=user.phoneOtp;
+          user.phoneOtp="";
+          await user.save();
+          if(req.body.otp==otp)
+          {  
+
+             const token=await createToken(user._id);
+
+            res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
+            return res.status(200).json({otp:otp});
+          }
+          else
+          {
+            return res.status(404).json({message:"InValid OTP"});
+          }
+      }
+      else
+      {
+        return res.status(500).json({message:"OTP Expired"});
+      }
+    }
+    catch(err)
+    {
+      console.log(err);
+      return res.status(500).json({message:"Invalid OTP"});
+    }
+
 };
