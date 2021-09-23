@@ -144,11 +144,11 @@ module.exports.verifyOtp=async (req,res)=>{
       {
           res.cookie("userid","");
           const otp=user.phoneOtp;
-          user.phoneOtp="";
-          await user.save();
+         
           if(req.body.otp==otp)
           {  
-
+             user.phoneOtp="";
+             await user.save();
              const token=await createToken(user._id);
 
             res.cookie('jwt',token, { httpOnly: true, maxAge: maxAge * 1000 });
