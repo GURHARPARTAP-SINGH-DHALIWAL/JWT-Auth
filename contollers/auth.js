@@ -142,13 +142,14 @@ module.exports.verifyOtp=async (req,res)=>{
     
       if(user)
       {
-          res.cookie("userid","");
+        
           const otp=user.phoneOtp;
          
           if(req.body.otp==otp)
           {  
              user.phoneOtp="";
              await user.save();
+             res.cookie("userid","");
              res.clearCookie('userid');
              const token=await createToken(user._id);
 
