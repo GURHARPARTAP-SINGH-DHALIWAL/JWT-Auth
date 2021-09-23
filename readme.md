@@ -2,6 +2,8 @@
 
 A project for learning authentication using JWT
 
+## Added two-factor authentication (login using otp on phone)
+
 ## Technologies Used
 
 * Node.js
